@@ -20,22 +20,25 @@ def test():
 
 
 # User should want two things, country and year...
-@application.route("/reception/<tek>", methods=['POST'])
-def retrieval(tek):
+@application.route("/reception", methods=['POST'])
+def retrieval():
     # Here we should get the country and year they asked for.
     # TODO: ask backend for a sample request of year and country name
     # TODO: Forest Percent/ Forest Area/ Agr Land Perc/ Pop /
+    # TODO: Country and Year
+    #       Then forest cover
     try:
         if request.method == 'POST':
             # Give response that says 'Yes, that worked here's data'
             # {"Country Name":""}
             #
             #
-            json_got = spout(tek)
+            #json_got = spout(tek)
             r = Response(response=df.iloc[[1]].to_json(), status=200,
                          mimetype="application/json")
             r.headers["Content-Type"] = "text/xml; charset=utf-8"
-            return json_got
+            return r
+            #return json_got
             # If they do a GET it auto doesn't allow tmyk wow
     except Exception as e:
         r = Response(response="Something broke but unsure of what",
