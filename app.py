@@ -22,9 +22,9 @@ def test():
 # User should want two things, country and year...
 @application.route("/reception", methods=['GET'])
 def retrieval():
-    # Here we should get the country and year they asked for.
-    # TODO: ask backend for a sample request of year and country name
-    # TODO: use forest coverage percentage
+    '''
+    Here we should get the country and year they asked for.
+    '''
     try:
         if request.method == 'GET':
             country = request.args.get('country')  # If no key then null
@@ -42,9 +42,9 @@ def retrieval():
 # This endpoint gives them a big list of possible country names in JSON
 @application.route("/countries", methods=['GET'])
 def cNames():
-    # Not sure if they want a big list of country names so they don't
-    # have to manually do that, but here it is
-    # TODO: unsure if they want Row #: Cname or just the country names
+    '''
+    Returns a JSON list of country names
+    '''
     a = pd.DataFrame(df['Country Name'].unique(), columns=['cname']).to_json()
     r = Response(response=a,
                  status=200,
@@ -54,9 +54,12 @@ def cNames():
 
 
 def spout(c, y):
-    # Perhaps this can be the function to retrieve the apropos data
+    '''
+    Takes country and year and returns wrapped JSON object
+    '''
     f = float(df[(df['Country Name'] == c) & (df['Year'] == int(y))]['Forest Land Percent'])
     print(f)
+    # Returns Flask.Response object (so no need to wrap again in Response)
     return jsonify({'Forest Coverage Percent': f})
 
 if __name__ == "__main__":
