@@ -20,28 +20,19 @@ def test():
 
 
 # User should want two things, country and year...
-@application.route("/reception", methods=['POST'])
+@application.route("/reception", methods=['GET'])
 def retrieval():
     # Here we should get the country and year they asked for.
     # TODO: ask backend for a sample request of year and country name
-    # TODO: Forest Percent/ Forest Area/ Agr Land Perc/ Pop /
-    # TODO: Country and Year
-    #       Then forest cover
+    # TODO: use forest coverage percentage
     try:
-        if request.method == 'POST':
-            # Give response that says 'Yes, that worked here's data'
-            # {"Country Name":""}
-            #
-            #
-            #json_got = spout(tek)
-            r = Response(response=df.iloc[[1]].to_json(), status=200,
-                         mimetype="application/json")
-            r.headers["Content-Type"] = "text/xml; charset=utf-8"
-            return r
-            #return json_got
+        if request.method == 'GET':
+            country = request.args.get('country')  # If no key then null
+            year = request.args.get('year')  # If no key then null
+            return spout(country, year)
             # If they do a GET it auto doesn't allow tmyk wow
     except Exception as e:
-        r = Response(response="Something broke but unsure of what",
+        r = Response(response=f"Something broke: {e}",
                      status=404,
                      mimetype="application/xml")
         r.headers["Content-Type"] = "text/xml; charset=utf-8"
@@ -62,11 +53,11 @@ def cNames():
     return r
 
 
-def spout(json_asked):
+def spout(c, y):
     # Perhaps this can be the function to retrieve the apropos data
-    content = request.json
-    print(content['test'])
-    return jsonify({"yea": "no"})
+    f = float(df[(df['Country Name'] == c) & (df['Year'] == int(y))]['Forest Land Percent'])
+    print(f)
+    return jsonify({'Forest Coverage Percent': f})
 
 if __name__ == "__main__":
     application.run(host='0.0.0.0', debug=True)
