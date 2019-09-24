@@ -32,7 +32,13 @@ def retrieval():
             return spout(country, year)
             # If they do a GET it auto doesn't allow tmyk wow
     except Exception as e:
-        r = Response(response=f"Something broke: {e}",
+        r = Response(response=f"""
+Something broke,
+perhaps the year (1990-2016) or country name is wrong.
+!!!{e}!!!
+Use the /countries endpoint to get a list
+of country names in case.
+""",
                      status=404,
                      mimetype="application/xml")
         r.headers["Content-Type"] = "text/xml; charset=utf-8"
@@ -58,6 +64,7 @@ def spout(c, y):
     Takes country and year and returns wrapped JSON object
     '''
     f = float(df[(df['Country Name'] == c) & (df['Year'] == int(y))]['Forest Land Percent'])
+
     print(f)
     # Returns Flask.Response object (so no need to wrap again in Response)
     return jsonify({'Forest Coverage Percent': f})
