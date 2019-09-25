@@ -2,6 +2,7 @@ from flask import Flask, Response, request, jsonify
 from flask_cors import CORS
 import pandas as pd
 import json
+import requests  # pythons default requests
 
 df = pd.read_csv('test.csv')
 
@@ -96,36 +97,58 @@ def aYears():
     return r
 
 
-def spout(c, y, detail=0):
+def spout(c, y=None, detail=0):
     '''
     Takes country and year and returns wrapped JSON object
     '''
     if detail == 0:
-        f = float(df[(df['Country Name'] == c) & (df['Year'] == int(y))]['Forest Land Percent'])  # noqa
+        if y is None:
+            jStr = df[df['Country Name'] == c][
+                ['Year', 'Forest Land Percent']].to_json(orient='table',
+                                                         index=False)
+            j1 = json.loads(jStr)['data']
+            print(j1)
+            return(jsonify(j1))
+        else:
+            f = float(df[(df['Country Name'] == c) & (df['Year'] == int(y))]['Forest Land Percent'])  # noqa
+            print(f)
+            # Returns Flask.Response object
+            return jsonify({'Forest Coverage Percent': f})
 
-        print(f)
-        # Returns Flask.Response object (so no need to wrap again in Response)
-        return jsonify({'Forest Coverage Percent': f})
     else:
-        filtered = df[(df['Country Name'] == c) & (df['Year'] == int(y))]
-        cn = filtered['Country Name'].to_string(index=False).strip()
-        ct = filtered['Country Code'].to_string(index=False).strip()
-        yr = int(filtered['Year'])
-        ff = float(filtered['Forest Land Percent'])
-        ap = float(filtered['Agriculture Land Percentage'])
-        pp = float(filtered['Population'])
-        my = float(filtered['GDP Per Capita (2019 USD)'])
-        # Unfortunately must be in separate JSON thingies because
-        # if not it'll be unpredictably unordered it seems like.
-        return jsonify(
-            {'Country Name': cn},
-            {'Country Code': ct},
-            {'Year': yr},
-            {'Forest Land Percentage': ff},
-            {'Agri Land Percentage': ap},
-            {'Population': pp},
-            {'GDP per Capita (2019USD)': my}
-        )
+        if y is None:
+            jStr = df[df['Country Name'] == c][
+                ['Year',
+                 'Forest Land Percent',
+                 'Agriculture Land Percentage',
+                 'Population',
+                 'GDP Per Capita (2019 USD)']].to_json(orient='table',
+                                                       index=False)
+            j1 = json.loads(jStr)['data']
+            print(j1)
+            return(jsonify(j1))
+
+        else:
+            filtered = df[(df['Country Name'] == c) & (df['Year'] == int(y))]
+            cn = filtered['Country Name'].to_string(index=False).strip()
+            ct = filtered['Country Code'].to_string(index=False).strip()
+            yr = int(filtered['Year'])
+            ff = float(filtered['Forest Land Percent'])
+            ap = float(filtered['Agriculture Land Percentage'])
+            pp = float(filtered['Population'])
+            my = float(filtered['GDP Per Capita (2019 USD)'])
+            # Unfortunately must be in separate JSON thingies because
+            # if not it'll be unpredictably unordered it seems like.
+            return jsonify(
+                {'Country Name': cn},
+                {'Country Code': ct},
+                {'Year': yr},
+                {'Forest Land Percentage': ff},
+                {'Agri Land Percentage': ap},
+                {'Population': pp},
+                {'GDP per Capita (2019USD)': my}
+            )
+
 
 if __name__ == "__main__":
     application.run(host='0.0.0.0', debug=False)
