@@ -86,4 +86,4 @@ def spout(c, y):
     return jsonify({'Forest Coverage Percent': f})
 
 if __name__ == "__main__":
-    application.run(host='0.0.0.0', debug=True)
+    application.run(host='0.0.0.0', debug=False)
