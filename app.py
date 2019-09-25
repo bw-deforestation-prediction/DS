@@ -101,7 +101,7 @@ def spout(c, y, detail=0):
     Takes country and year and returns wrapped JSON object
     '''
     if detail == 0:
-        f = float(df[(df['Country Name'] == c) & (df['Year'] == int(y))]['Forest Land Percent'])
+        f = float(df[(df['Country Name'] == c) & (df['Year'] == int(y))]['Forest Land Percent'])  # noqa
 
         print(f)
         # Returns Flask.Response object (so no need to wrap again in Response)
