@@ -100,7 +100,7 @@ def spout(c, y, detail=0):
     '''
     Takes country and year and returns wrapped JSON object
     '''
-    if max == 0:
+    if detail == 0:
         f = float(df[(df['Country Name'] == c) & (df['Year'] == int(y))]['Forest Land Percent'])
 
         print(f)
