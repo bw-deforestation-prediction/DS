@@ -106,9 +106,9 @@ def spout(c, y=None, detail=0):
             jStr = df[df['Country Name'] == c][
                 ['Year', 'Forest Land Percent']].to_json(orient='table',
                                                          index=False)
-            j1 = str(json.loads(jStr)['data'])
+            j1 = json.loads(jStr)['data']
             print(j1)
-            return(j1)
+            return(jsonify(j1))
         else:
             f = float(df[(df['Country Name'] == c) & (df['Year'] == int(y))]['Forest Land Percent'])  # noqa
             print(f)
@@ -124,9 +124,9 @@ def spout(c, y=None, detail=0):
                  'Population',
                  'GDP Per Capita (2019 USD)']].to_json(orient='table',
                                                        index=False)
-            j1 = str(json.loads(jStr)['data'])
+            j1 = json.loads(jStr)['data']
             print(j1)
-            return(j1)
+            return(jsonify(j1))
 
         else:
             filtered = df[(df['Country Name'] == c) & (df['Year'] == int(y))]
