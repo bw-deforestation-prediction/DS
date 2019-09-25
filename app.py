@@ -11,17 +11,23 @@ application = Flask(__name__)
 # addresses the computer won't disallow the request...due to CORS.
 CORS(application)
 
+error_msg = f'''
+Something broke!
+Use the /countries or /years endpoints to get a list
+of possible values.
+'''
+
 
 # Test endpoint to see if working
 @application.route("/", methods=['POST', 'GET'])
 def test():
-    r = Response(response="This worked", status=200,
+    r = Response(response="This worked!", status=200,
                  mimetype="application/xml")
     r.headers["Content-Type"] = "text/xml; charset=utf-8"
     return r
 
 
-# User should want two things, country and year...
+# User will get a simple return of country and year
 @application.route("/reception", methods=['GET'])
 def retrieval():
     '''
@@ -34,13 +40,28 @@ def retrieval():
             return spout(country, year)
     except Exception as e:
         # Unfortunately I'm not going to wrap this in indv. strings
-        r = Response(response=f"""
-Something broke,
-perhaps the year or country name is wrong.
-!!!{e}!!!
-Use the /countries or /years endpoints to get a list
-of possible values.
-""",
+        r = Response(response=error_msg+str(e),
+                     status=404,
+                     mimetype="application/xml")
+        r.headers["Content-Type"] = "text/xml; charset=utf-8"
+        return r
+
+
+# User is getting a detailed breakdown of country in that year
+@application.route("/reception/detail", methods=['GET'])
+def maxRetrieval():
+    '''
+    Here we should get all important data for the
+    country and year they asked for.
+    '''
+    try:
+        if request.method == 'GET':
+            country = request.args.get('country')  # If no key then null
+            year = request.args.get('year')  # If no key then null
+            return spout(country, year, detail=1)
+    except Exception as e:
+        # Unfortunately I'm not going to wrap this in indv. strings
+        r = Response(response=error_msg+str(e),
                      status=404,
                      mimetype="application/xml")
         r.headers["Content-Type"] = "text/xml; charset=utf-8"
@@ -75,15 +96,36 @@ def aYears():
     return r
 
 
-def spout(c, y):
+def spout(c, y, detail=0):
     '''
     Takes country and year and returns wrapped JSON object
     '''
-    f = float(df[(df['Country Name'] == c) & (df['Year'] == int(y))]['Forest Land Percent'])
+    if max == 0:
+        f = float(df[(df['Country Name'] == c) & (df['Year'] == int(y))]['Forest Land Percent'])
 
-    print(f)
-    # Returns Flask.Response object (so no need to wrap again in Response)
-    return jsonify({'Forest Coverage Percent': f})
+        print(f)
+        # Returns Flask.Response object (so no need to wrap again in Response)
+        return jsonify({'Forest Coverage Percent': f})
+    else:
+        filtered = df[(df['Country Name'] == c) & (df['Year'] == int(y))]
+        cn = filtered['Country Name'].to_string(index=False).strip()
+        ct = filtered['Country Code'].to_string(index=False).strip()
+        yr = int(filtered['Year'])
+        ff = float(filtered['Forest Land Percent'])
+        ap = float(filtered['Agriculture Land Percentage'])
+        pp = float(filtered['Population'])
+        my = float(filtered['GDP Per Capita (2019 USD)'])
+        # Unfortunately must be in separate JSON thingies because
+        # if not it'll be unpredictably unordered it seems like.
+        return jsonify(
+            {'Country Name': cn},
+            {'Country Code': ct},
+            {'Year': yr},
+            {'Forest Land Percentage': ff},
+            {'Agri Land Percentage': ap},
+            {'Population': pp},
+            {'GDP per Capita (2019USD)': my}
+        )
 
 if __name__ == "__main__":
     application.run(host='0.0.0.0', debug=False)
