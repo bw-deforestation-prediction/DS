@@ -79,4 +79,4 @@ layout2 = dict(
 fig2 = dict(data=slider2, layout=layout2)
 
 plotly.offline.iplot(fig2)
-plotly.offline.plot(fig, filename='prediction_map.html', auto_open=False)
+plotly.offline.plot(fig2, filename='prediction_map.html', auto_open=False)
