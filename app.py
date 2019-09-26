@@ -48,7 +48,7 @@ def retrieval():
         return r
 
 
-# User is getting a detailed breakdown of country in that year
+# User is getting a detailed breakdown of country in that year.
 @application.route("/reception/detail", methods=['GET'])
 def maxRetrieval():
     '''
@@ -61,7 +61,7 @@ def maxRetrieval():
             year = request.args.get('year')  # If no key then null
             return spout(country, year, detail=1)
     except Exception as e:
-        # Unfortunately I'm not going to wrap this in indv. strings
+        # Unfortunately I'm not going to wrap this in indv. strings.
         r = Response(response=error_msg+str(e),
                      status=404,
                      mimetype="application/xml")
@@ -69,7 +69,7 @@ def maxRetrieval():
         return r
 
 
-# This endpoint gives a big list of possible country names in JSON
+# This endpoint gives a big list of possible country names in JSON.
 @application.route("/countries", methods=['GET'])
 def cNames():
     '''
@@ -83,7 +83,7 @@ def cNames():
     return r
 
 
-# This endpoint gives a list of possible years in JSON
+# This endpoint gives a list of possible years in JSON.
 @application.route("/years", methods=['GET'])
 def aYears():
     '''
@@ -97,25 +97,36 @@ def aYears():
     return r
 
 
-def spout(c, y=None, detail=0):
+def spout(c=None, y=None, detail=0):
     '''
     Takes country and year and returns wrapped JSON object
     '''
+    if c is None and y is None:
+        r = Response(response='What? No country and year specified.',
+                     status=404,
+                     mimetype="application/json")
+        r.headers["Content-Type"] = "text/json; charset=utf-8"
+        return r
+
     if detail == 0:
+        # Returns a list of all the years for a specified country.
         if y is None:
             jStr = df[df['Country Name'] == c][
                 ['Year', 'Forest Land Percent']].to_json(orient='table',
                                                          index=False)
             j1 = json.loads(jStr)['data']
-            print(j1)
             return(jsonify(j1))
-        else:
+        # Or if year is specified: give just that year's forest land %.
+        elif y is not None:
             f = float(df[(df['Country Name'] == c) & (df['Year'] == int(y))]['Forest Land Percent'])  # noqa
-            print(f)
             # Returns Flask.Response object
             return jsonify({'Forest Coverage Percent': f})
+        else:
+            return 1
 
-    else:
+    elif detail == 1:
+        # Returns a list of all the details for a specified country
+        # for all the years.
         if y is None:
             jStr = df[df['Country Name'] == c][
                 ['Year',
@@ -125,10 +136,11 @@ def spout(c, y=None, detail=0):
                  'GDP Per Capita (2019 USD)']].to_json(orient='table',
                                                        index=False)
             j1 = json.loads(jStr)['data']
-            print(j1)
             return(jsonify(j1))
 
-        else:
+        # Returns a list of all the details for specified country
+        # and specific year.
+        elif y is not None:
             filtered = df[(df['Country Name'] == c) & (df['Year'] == int(y))]
             cn = filtered['Country Name'].to_string(index=False).strip()
             ct = filtered['Country Code'].to_string(index=False).strip()
@@ -148,9 +160,9 @@ def spout(c, y=None, detail=0):
                 {'Population': pp},
                 {'GDP per Capita (2019USD)': my}
             )
+        else:
+            return 1
 
 
 if __name__ == "__main__":
     application.run(host='0.0.0.0', debug=False)
-
-# Test
