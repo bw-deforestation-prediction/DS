@@ -22,6 +22,9 @@ of possible values.
 # Test endpoint to see if working
 @application.route("/", methods=['POST', 'GET'])
 def test():
+    """
+    Just to test if online/working
+    """
     r = Response(response="This worked!", status=200,
                  mimetype="application/xml")
     r.headers["Content-Type"] = "text/xml; charset=utf-8"
@@ -31,9 +34,19 @@ def test():
 # User will get a simple return of country and year
 @application.route("/reception", methods=['GET'])
 def retrieval():
-    '''
+    """
     Here we should get the data for the country and year they asked for.
-    '''
+
+    Endpoint:
+    ---------
+    http://ftable-server.herokuapp.com/reception?country=<>&year<>
+    (<> is where you put parameters.
+    Ex: /reception?country=Aruba&year=2000)
+
+    Output:
+    ---------
+    (Check function at bottom, it returns json)
+    """
     try:
         if request.method == 'GET':
             country = request.args.get('country')  # If no key then null
@@ -51,10 +64,20 @@ def retrieval():
 # User is getting a detailed breakdown of country in that year.
 @application.route("/reception/detail", methods=['GET'])
 def maxRetrieval():
-    '''
+    """
     Here we should get all important data for the
     country and year they asked for.
-    '''
+
+    Endpoint:
+    ---------
+    http://ftable-server.herokuapp.com/reception/detail?country=<>&year<>
+    (<> is where you put parameters.
+    Ex: reception/detail?country=United%20States&year=1995)
+
+    Output:
+    ---------
+    (Check function at bottom, it returns json)
+    """
     try:
         if request.method == 'GET':
             country = request.args.get('country')  # If no key then null
@@ -72,9 +95,17 @@ def maxRetrieval():
 # This endpoint gives a big list of possible country names in JSON.
 @application.route("/countries", methods=['GET'])
 def cNames():
-    '''
-    Returns a JSON list of country names
-    '''
+    """
+    This endpoint returns a JSON list of country names
+
+    Endpoint:
+    http://ftable-server.herokuapp.com/countries
+    ---------
+
+    Output:
+    ---------
+    {'cname': {'Country Name': str}} | json
+    """
     a = pd.DataFrame(df['Country Name'].unique(), columns=['cname']).to_json()
     r = Response(response=a,
                  status=200,
@@ -86,9 +117,17 @@ def cNames():
 # This endpoint gives a list of possible years in JSON.
 @application.route("/years", methods=['GET'])
 def aYears():
-    '''
-    Returns a JSON list of years
-    '''
+    """
+    This endpoint returns a JSON list of years
+
+    Endpoint:
+    http://ftable-server.herokuapp.com/years
+    ---------
+
+    Output:
+    ---------
+    {'years': {'years': int}} | json
+    """
     a = pd.DataFrame(df['Year'].unique(), columns=['years']).to_json()
     r = Response(response=a,
                  status=200,
@@ -98,9 +137,40 @@ def aYears():
 
 
 def spout(c=None, y=None, detail=0):
-    '''
-    Takes country and year and returns wrapped JSON object
-    '''
+    """
+    A franken-function that takes country and year (if given) and
+    returns Response wrapped JSON object.
+
+    Parameters:
+    ---------
+    Country name    : c
+    Year            : y
+    Detailed return : detail
+
+    Output:
+    ---------
+    (Always returns a Response object, either with jsonify or manually)
+    reception?country=<>&year<> : json
+        {'Forest Coverage Percent': float}
+    ---
+    reception?country=<> : json
+    (returns all year's forest land percentage [same as FCP])
+        [{'Forest Land Percent': float, 'Year': int},
+         {'Forest Land Percent': float, 'Year': int}] ...etc
+    ---
+    reception/detail?country=<>&year<> : json
+        [{'Country Name': str}, {'Country Code': str}, ...etc ]
+        Also has 'Year'(int), 'Forest Land Percentage'(float),
+        'Agri Land Percentage'(float), 'Population'(float),
+        'GDP per Capita (2019USD)'(float)
+    ---
+    reception/detail?country=<> : json
+        [{'Country Name': str}, {'Country Code': str}, ...etc ]
+        Also has 'Year'(int), 'Forest Land Percentage'(float),
+        'Agri Land Percentage'(float), 'Population'(float),
+        'GDP per Capita (2019USD)'(float)
+        REPEATED FOR EACH YEAR
+    """
     if c is None and y is None:
         r = Response(response='What? No country and year specified.',
                      status=404,
