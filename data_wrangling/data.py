@@ -66,7 +66,7 @@ DFlist = [newDF1, newDF2, newDF3, newDF4, newDF5]
 df0 = mergeDFs(DFlist)
 
 # imports prediction data
-predDF = pd.read_csv('random_forest_data.csv', index_col=0)
+predDF = pd.read_csv('forest_predictions.csv', index_col=0)
 
 
 # creates a dictionary for country codes/names
